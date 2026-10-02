@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel de regalos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f1f3;--pn:#fff;--ink:#2c2230;--mut:#7a6d80;--ac:#c2185b;--ln:#e2d6de;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#181220;--pn:#241a2e;--ink:#f1e8f3;--mut:#a597ad;--ln:#3a2d47}}
+:root[data-theme="dark"]{--bg:#181220;--pn:#241a2e;--ink:#f1e8f3;--mut:#a597ad;--ln:#3a2d47}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,sans-serif}
+h1,h3{font-family:'Cormorant Garamond',Georgia,serif;margin:0}
+h3{font-size:22px;margin:20px 0 8px;padding-top:12px;border-top:1px solid var(--ln)}
+input,select,textarea{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--ln);border-radius:8px;background:transparent;color:inherit;font:inherit}
+input[type=color]{padding:2px;height:36px;width:56px;cursor:pointer}
+label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
+.b{padding:10px 14px;border:1px solid var(--ac);border-radius:8px;background:var(--ac);color:#fff;font:600 15px system-ui;cursor:pointer}
+.b.o{background:transparent;color:var(--ac)}.b.s{padding:7px 10px;font-size:14px}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.row select{flex:1}.row span{color:var(--mut);font-size:14px;white-space:nowrap}
+.pinr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.pinr b{font:700 20px monospace;letter-spacing:.1em}
+#lg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{background:var(--pn);padding:28px 24px;border-radius:14px;width:min(92vw,360px);border:1px solid var(--ln)}
+.box h1{font-size:32px}.box p{margin:4px 0 14px;color:var(--mut)}.box input{margin-bottom:10px}.box .b{width:100%}.box small{display:block;margin-top:12px;color:var(--mut)}
+#app{display:none;height:100%;grid-template-columns:400px 1fr}#app.on{display:grid}
+.side{overflow:auto;padding:16px;background:var(--pn);border-right:1px solid var(--ln)}
+.vw{padding:12px;min-height:0}#pv{width:100%;height:100%;border:0;border-radius:14px;background:#1d1530}
+.fr{display:grid;grid-template-columns:52px 1fr 56px auto;gap:8px;align-items:center;margin-bottom:6px}
+.th{width:52px;height:52px;border-radius:10px;background:linear-gradient(#2b1055,#7597de)}
+.stp{display:flex;align-items:center;gap:6px}.stp button{width:30px;height:30px;border-radius:8px;border:1px solid var(--ln);background:transparent;color:inherit;font-size:18px;cursor:pointer}.stp span{min-width:18px;text-align:center}
+.two{display:flex;gap:16px}
+.acts{position:sticky;bottom:0;background:var(--pn);padding:12px 0 4px;display:flex;gap:8px;margin-top:16px}
+#tt{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#2c2230;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
+@media(max-width:820px){#app.on{grid-template-columns:1fr;grid-template-rows:42% 1fr}.vw{order:-1}.side{border-right:0;border-top:1px solid var(--ln)}}
+.pwd{position:relative;margin-bottom:10px}.pwd input{margin:0;padding-right:84px}.pwd button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--ac);font:600 13px system-ui;cursor:pointer}
+</style></head><body>
+<div id="lg"><div class="box"><h1>Panel de regalos</h1><p>Entra con tu cuenta</p>
+<input id="em" type="email" placeholder="Correo" autocomplete="username"><div class="pwd"><input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password"><button type="button" id="ey">Mostrar</button></div>
+<button class="b" id="en">Entrar</button><button class="b o" id="so" style="display:none;margin-top:8px;width:100%">Cerrar sesión</button><div id="er" role="alert" style="color:#d6335e;margin-top:10px;font-size:14px;overflow-wrap:anywhere"></div><small>Tu cuenta te la entrega quien administra el servicio.</small></div></div>
+
+<div id="app"><div class="side">
+<div class="row"><select id="gs" aria-label="Mis regalos"></select><span id="cnt"></span></div>
+<div class="row"><button class="b s" id="nw">Nuevo regalo</button><button class="b s o" id="dl">Eliminar</button><button class="b s o" id="lo">Salir</button></div>
+<div class="pinr">PIN <b id="pin"></b><button class="b s o" id="cp">Copiar</button><button class="b s o" id="rp">Nuevo PIN</button></div>
+
+<h3>Mensaje</h3>
+<label>Nombre de quien lo recibe</label><input data-k="para" maxlength="40">
+<label>Mensaje de la carta</label><textarea data-k="mensaje" rows="7" maxlength="1500"></textarea>
+<label>Firma</label><input data-k="firma" maxlength="60">
+<h3>Carta</h3>
+<label>Estilo de papel</label><select data-k="carta" id="sc"></select>
+<label>Tipografía</label><select data-k="fuente" id="sf"></select>
+<h3>Ramo</h3><div id="fr"></div>
+<div class="two"><div><label>Papel</label><input type="color" data-k="papel"></div><div><label>Lazo</label><input type="color" data-k="lazo"></div></div>
+<h3>Fondo</h3>
+<div class="two"><div><label>Color de arriba</label><input type="color" data-k="f0"></div><div><label>Color de abajo</label><input type="color" data-k="f1"></div></div>
+<div class="acts"><button class="b" id="sv">Guardar</button><button class="b o" id="pl">Ver animación completa</button></div>
+</div><div class="vw"><iframe id="pv" src="index.html" title="Vista previa del regalo"></iframe></div></div>
+<div id="tt" role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="fb.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const er=m=>{$('er').textContent=m};
+addEventListener('error',e=>er('Error de la página: '+e.message));
+addEventListener('unhandledrejection',e=>er('Error: '+((e.reason&&(e.reason.code||e.reason.message))||e.reason)));
+const TIPOS=[['rosa','Rosa','#d81b3c',4],['girasol','Girasol','',1],['tulipan','Tulipán','#ff7a3d',1],['gerbera','Gerbera','#ff4d2e',1],['margarita','Margarita','',2],['lirio','Lirio','#ffffff',1],['iris','Iris','#6a3fd1',1],['clavel','Clavel','#ff5fa2',1],['hortensia','Hortensia','#8f7bff',1],['lavanda','Lavanda','#9b6bd6',2]];
+const CARTAS=[['antiguo','Papel antiguo'],['pergamino','Pergamino'],['minimal','Minimalista'],['rosado','Rosado'],['noche','Noche']];
+const FUENTES=['Dancing Script','Caveat','Cormorant Garamond'];
+$('sc').replaceChildren(...CARTAS.map(([v,t])=>new Option(t,v)));
+$('sf').replaceChildren(...FUENTES.map(f=>new Option(f,f)));
+
+// Usuario y almacenamiento de prueba: se cambiarán por Firebase
+const USER={limite:5};
+const AL='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const mkPin=()=>{const r=crypto.getRandomValues(new Uint8Array(8));const s=[...r].map(v=>AL[v%AL.length]).join('');return s.slice(0,4)+'-'+s.slice(4)};
+const nuevo=()=>({pin:mkPin(),para:'',mensaje:'',firma:'',fondo:['#2b1055','#7597de'],papel:'#f0478f',lazo:'#ffd166',carta:'antiguo',fuente:'Dancing Script',flores:TIPOS.map(([t,,c,n])=>({t,c,n}))});
+let gifts=[],cur=0,tm,uid;
+const g=()=>gifts[cur];
+const toast=m=>{const t=$('tt');t.textContent=m;t.style.opacity=1;clearTimeout(t.h);t.h=setTimeout(()=>t.style.opacity=0,2200)};
+
+function sync(play){clearTimeout(tm);tm=setTimeout(()=>$('pv').contentWindow.postMessage({gift:g(),play:play?1:0},'*'),play?0:120)}
+$('pv').onload=()=>sync();
+addEventListener('message',e=>{const t=e.data&&e.data.thumbs;if(t)for(const k in t){const el=$('th'+k);if(el)el.innerHTML=t[k]}});
+
+function list(){$('gs').replaceChildren(...gifts.map((x,i)=>new Option((x.para||'Regalo sin nombre')+' · '+x.pin,i)));$('gs').value=cur;$('cnt').textContent=gifts.length+' de '+USER.limite}
+function rows(){$('fr').innerHTML=g().flores.map((f,i)=>`<div class="fr"><div class="th" id="th${f.t}"></div><b>${TIPOS[i][1]}</b>${TIPOS[i][2]?`<input type="color" value="${f.c}" data-c="${i}" aria-label="Color de ${TIPOS[i][1]}">`:'<span></span>'}<div class="stp"><button data-m="${i}" aria-label="Menos">−</button><span>${f.n}</span><button data-p="${i}" aria-label="Más">+</button></div></div>`).join('')}
+function fill(){document.querySelectorAll('[data-k]').forEach(el=>{const k=el.dataset.k;el.value=/^f[01]$/.test(k)?g().fondo[k[1]]:g()[k]});$('pin').textContent=g().pin;list();rows();sync()}
+
+document.querySelectorAll('[data-k]').forEach(el=>el.oninput=()=>{const k=el.dataset.k;if(/^f[01]$/.test(k))g().fondo[k[1]]=el.value;else g()[k]=el.value;if(k==='para')list();sync()});
+$('fr').oninput=e=>{const i=e.target.dataset.c;if(i!=null){g().flores[i].c=e.target.value;sync()}};
+$('fr').onclick=e=>{const b=e.target.closest('button');if(!b)return;const m=b.dataset.m,p=b.dataset.p,i=m!=null?m:p,f=g().flores[i],tot=g().flores.reduce((a,x)=>a+x.n,0);
+  if(p!=null){if(f.n>=8)return toast('Máximo 8 de cada flor');if(tot>=40)return toast('El ramo admite hasta 40 flores');f.n++}else if(f.n>0)f.n--;
+  b.parentNode.querySelector('span').textContent=f.n;sync()};
+
+const err=e=>toast(e.code==='permission-denied'?'Sin permiso para esa acción':'Error: '+(e.code||e.message));
+const U=arr=>({regalos:arr});
+const crear=async x=>{const b=writeBatch(db);b.set(doc(db,'regalos',x.pin),{...x,owner:uid});b.update(doc(db,'usuarios',uid),U([...gifts.map(y=>y.pin),x.pin]));await b.commit()};
+$('gs').onchange=()=>{cur=+$('gs').value;fill()};
+$('nw').onclick=async()=>{if(gifts.length>=USER.limite)return toast('Llegaste al máximo de '+USER.limite+' regalos');const x=nuevo();try{await crear(x);gifts.push(x);cur=gifts.length-1;fill()}catch(e){err(e)}};
+$('dl').onclick=async()=>{if(gifts.length<2)return toast('Debes conservar al menos un regalo');if(!confirm('¿Eliminar este regalo? No se puede deshacer.'))return;
+  try{const b=writeBatch(db),p=g().pin;b.delete(doc(db,'regalos',p));b.update(doc(db,'usuarios',uid),U(gifts.map(y=>y.pin).filter(y=>y!==p)));await b.commit();gifts.splice(cur,1);cur=0;fill()}catch(e){err(e)}};
+$('cp').onclick=()=>{try{navigator.clipboard.writeText(g().pin);toast('PIN copiado')}catch(e){toast('Copia el PIN a mano')}};
+$('rp').onclick=async()=>{if(!confirm('Se creará un PIN nuevo y el anterior dejará de funcionar. ¿Continuar?'))return;const o=g(),n={...o,pin:mkPin()};
+  try{const b=writeBatch(db);b.set(doc(db,'regalos',n.pin),{...n,owner:uid});b.delete(doc(db,'regalos',o.pin));b.update(doc(db,'usuarios',uid),U(gifts.map(y=>y.pin===o.pin?n.pin:y.pin)));await b.commit();gifts[cur]=n;fill()}catch(e){err(e)}};
+$('sv').onclick=async()=>{try{await setDoc(doc(db,'regalos',g().pin),{...g(),owner:uid});toast('Regalo guardado')}catch(e){err(e)}};
+$('pl').onclick=()=>sync(true);
+$('lo').onclick=()=>signOut(auth);
+const ent=async()=>{er('');try{await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value)}catch(e){console.error(e);toast(e.code==='auth/operation-not-supported-in-this-environment'?'Abre esta página desde http://localhost o desde tu sitio publicado':e.code==='auth/network-request-failed'?'Sin conexión con Firebase':'Correo o contraseña incorrectos')}};
+$('so').onclick=()=>{signOut(auth);er('');$('so').style.display='none'};
+$('ey').onclick=()=>{const p=$('pw'),v=p.type==='password';p.type=v?'text':'password';$('ey').textContent=v?'Ocultar':'Mostrar'};
+$('en').onclick=ent;$('pw').onkeydown=e=>{if(e.key==='Enter')ent()};
+onAuthStateChanged(auth,async u=>{
+  if(!u){uid=null;$('app').classList.remove('on');$('lg').style.display='flex';return}
+  er('Sesión activa como '+u.email+'. Verificando permisos…');try{const s=await getDoc(doc(db,'usuarios',u.uid));
+    if(!s.exists()||!s.data().activo){er('Esta cuenta (UID '+u.uid+') no tiene panel de regalos: debe crearla el superadmin en Nuevo usuario, o está desactivada.');$('so').style.display='block';return}
+    uid=u.uid;USER.limite=s.data().limite;
+    gifts=(await getDocs(query(collection(db,'regalos'),where('owner','==',uid)))).docs.map(d=>d.data());
+    er('');$('lg').style.display='none';$('app').classList.add('on');
+    if(!gifts.length){const x=nuevo();await crear(x);gifts.push(x)}
+    cur=0;fill()}catch(e){console.error(e);er('Error al cargar: '+(e.code||e.message));$('app').classList.remove('on');$('lg').style.display='flex';$('so').style.display='block'}});
+</script></body></html>

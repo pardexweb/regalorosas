@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Superadmin</title>
+<style>
+:root{--bg:#f6f1f3;--pn:#fff;--ink:#2c2230;--mut:#7a6d80;--ac:#c2185b;--ln:#e2d6de;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#181220;--pn:#241a2e;--ink:#f1e8f3;--mut:#a597ad;--ln:#3a2d47}}
+:root[data-theme="dark"]{--bg:#181220;--pn:#241a2e;--ink:#f1e8f3;--mut:#a597ad;--ln:#3a2d47}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,sans-serif}
+h1,h2{font-family:Georgia,serif;margin:0 0 10px}
+input{box-sizing:border-box;padding:9px 10px;border:1px solid var(--ln);border-radius:8px;background:transparent;color:inherit;font:inherit;width:100%}
+.b{padding:9px 13px;border:1px solid var(--ac);border-radius:8px;background:var(--ac);color:#fff;font:600 14px system-ui;cursor:pointer}
+.b.o{background:transparent;color:var(--ac)}
+.card,.box{background:var(--pn);border:1px solid var(--ln);border-radius:14px;padding:18px;margin:0 auto 16px;max-width:760px}
+#lg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}.box{width:min(92vw,360px);margin:0}.box input{margin-bottom:10px}.box .b{width:100%}
+#pn{display:none;padding:16px}
+.g{display:grid;grid-template-columns:2fr 1.4fr 1fr auto;gap:8px;align-items:end}
+.g label,.u label{font-size:13px;color:var(--mut)}
+.u{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--ln)}
+.u>div{flex:1 1 200px;min-width:0}.u b{display:block;overflow-wrap:anywhere}.u small{color:var(--mut)}.u input{width:80px}
+#tt{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#2c2230;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:opacity .3s;pointer-events:none}
+@media(max-width:640px){.g{grid-template-columns:1fr}}
+.pwd{position:relative;margin-bottom:10px}.pwd input{margin:0;padding-right:84px}.pwd button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--ac);font:600 13px system-ui;cursor:pointer}
+</style></head><body>
+<div id="lg"><div class="box"><h1>Superadmin</h1>
+<input id="em" type="email" placeholder="Correo" autocomplete="username"><div class="pwd"><input id="pw" type="password" placeholder="Contraseña" autocomplete="current-password"><button type="button" id="ey">Mostrar</button></div>
+<button class="b" id="en">Entrar</button><button class="b o" id="so" style="display:none;margin-top:8px;width:100%">Cerrar sesión</button><div id="er" role="alert" style="color:#d6335e;margin-top:10px;font-size:14px;overflow-wrap:anywhere"></div></div></div>
+<div id="pn">
+<div class="card"><h2>Nuevo usuario</h2><div class="g">
+<div><label>Correo</label><input id="ne" type="email"></div>
+<div><label>Contraseña temporal (mín. 6)</label><input id="np" type="text" autocomplete="off"></div>
+<div><label>Máx. regalos</label><input id="nl" type="number" min="1" max="50" value="5"></div>
+<button class="b" id="cr">Crear</button></div></div>
+<div class="card"><h2>Usuarios</h2><div id="ul"></div><button class="b o" id="lo">Cerrar sesión</button></div>
+</div><div id="tt" role="status"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="fb.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const er=m=>{$('er').textContent=m};
+addEventListener('error',e=>er('Error de la página: '+e.message));
+addEventListener('unhandledrejection',e=>er('Error: '+((e.reason&&(e.reason.code||e.reason.message))||e.reason)));
+const toast=m=>{const t=$('tt');t.textContent=m;t.style.opacity=1;clearTimeout(t.h);t.h=setTimeout(()=>t.style.opacity=0,2600)};
+
+function fila(id,u){const e=document.createElement('div');e.className='u';
+  e.innerHTML='<div><b></b><small></small></div><label>Máx. regalos <input type="number" min="1" max="50"></label><button class="b s a"></button><button class="b o d">Eliminar</button>';
+  e.querySelector('b').textContent=u.email;
+  e.querySelector('small').textContent=(u.regalos||[]).length+' regalos · '+(u.activo?'Activo':'Desactivado');
+  const n=e.querySelector('input');n.value=u.limite;
+  n.onchange=async()=>{try{await updateDoc(doc(db,'usuarios',id),{limite:Math.max(1,+n.value||5)});toast('Límite actualizado')}catch(x){toast('No se pudo actualizar')}};
+  const a=e.querySelector('.a');a.textContent=u.activo?'Desactivar':'Activar';
+  a.onclick=async()=>{try{await updateDoc(doc(db,'usuarios',id),{activo:!u.activo});cargar()}catch(x){toast('No se pudo cambiar')}};
+  e.querySelector('.d').onclick=async()=>{
+    if(!confirm('¿Eliminar a '+u.email+' y todos sus regalos? No se puede deshacer.'))return;
+    try{const r=await getDocs(query(collection(db,'regalos'),where('owner','==',id)));
+      const b=writeBatch(db);r.docs.forEach(d=>b.delete(d.ref));b.delete(doc(db,'usuarios',id));await b.commit();
+      toast('Usuario eliminado');cargar()}catch(x){console.error(x);toast('No se pudo eliminar: '+(x.code||x.message))}};
+  return e}
+async function cargar(){const r=await getDocs(collection(db,'usuarios'));
+  $('ul').replaceChildren(...(r.docs.length?r.docs.map(d=>fila(d.id,d.data())):[Object.assign(document.createElement('p'),{textContent:'Aún no hay usuarios. Crea el primero arriba.'})]))}
+
+$('cr').onclick=async()=>{const em=$('ne').value.trim(),pw=$('np').value,li=Math.max(1,+$('nl').value||5);
+  if(!em||pw.length<6)return toast('Escribe un correo y una contraseña de 6 o más caracteres');
+  try{const sa=getAuth(initializeApp(cfg,'sec'+Date.now()));
+    const c=await createUserWithEmailAndPassword(sa,em,pw);await signOut(sa);
+    await setDoc(doc(db,'usuarios',c.user.uid),{email:em,limite:li,activo:true,regalos:[]});
+    $('ne').value=$('np').value='';toast('Usuario creado');cargar()}
+  catch(e){toast(e.code==='auth/email-already-in-use'?'Ese correo ya existe':'No se pudo crear: '+(e.code||e.message))}};
+const ent=async()=>{er('');try{await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value)}catch(e){console.error(e);toast(e.code==='auth/operation-not-supported-in-this-environment'?'Abre esta página desde http://localhost o desde tu sitio publicado':e.code==='auth/network-request-failed'?'Sin conexión con Firebase':'Correo o contraseña incorrectos')}};
+$('so').onclick=()=>{signOut(auth);er('');$('so').style.display='none'};
+$('ey').onclick=()=>{const p=$('pw'),v=p.type==='password';p.type=v?'text':'password';$('ey').textContent=v?'Ocultar':'Mostrar'};
+$('en').onclick=ent;$('pw').onkeydown=e=>{if(e.key==='Enter')ent()};
+$('lo').onclick=()=>signOut(auth);
+onAuthStateChanged(auth,async u=>{
+  if(!u){$('lg').style.display='flex';$('pn').style.display='none';return}
+  er('Sesión activa como '+u.email+'. Verificando permisos…');try{await cargar();er('');$('lg').style.display='none';$('pn').style.display='block'}
+  catch(e){console.error(e);er(e.code==='permission-denied'?'Entraste con el UID '+u.uid+', pero Firestore no lo reconoce como superadmin. Compara ese UID con el de la línea 4 de las reglas publicadas en Firebase.':'Error: '+(e.code||e.message));$('lg').style.display='flex';$('pn').style.display='none';$('so').style.display='block'}});
+</script></body></html>
